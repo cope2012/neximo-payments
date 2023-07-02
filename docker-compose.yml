@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+  payments:
+    container_name: payments-service
+    user: "${UID}:${GID}"
+    tty: true
+    build:
+      context: .
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - payments-db
+    env_file:
+      - .env
+  payments-db:
+    image: postgres:15.3
+    container_name: payments-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - payments-db:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+volumes:
+  payments-db:
