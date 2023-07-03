@@ -3,7 +3,7 @@ ARG PYTHON_CONTAINER=python
 
 FROM $PYTHON_CONTAINER:$PYTHON_VERSION-slim-buster
 
-# install required packages for django postgis
+# install required packages for django postgres
 RUN apt update && apt install -y  \
     curl \
     gcc \
