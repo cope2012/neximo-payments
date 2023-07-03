@@ -33,6 +33,9 @@ class UpdatePasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         user = self.context['user']
 
+        if attrs['old_password'] == attrs['new_password']:
+            raise ValidationError('passwords cant be the equals')
+
         if not user.check_password(attrs['old_password']):
             raise ValidationError('passwords dont match')
 

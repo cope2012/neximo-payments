@@ -13,6 +13,8 @@ class CustomAuth(BaseAuthentication):
             try:
                 access_token = authorization_header.split(' ')[1]
                 payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=['HS256'])
+            except jwt.InvalidSignatureError:
+                raise exceptions.AuthenticationFailed('token not valid')
             except jwt.ExpiredSignatureError:
                 raise exceptions.AuthenticationFailed('token is expired')
             except IndexError:

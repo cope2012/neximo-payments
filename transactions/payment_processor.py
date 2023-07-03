@@ -4,7 +4,7 @@ from typing import List, Dict
 _IVA = 1.16
 _COMMISSION = 1.03
 _EXEMPT_AMOUNT = 500
-_USD_TO_MXN = 17
+USD_TO_MXN = 17
 _USD_CURRENCY = "USD"
 
 
@@ -13,7 +13,7 @@ def _maybe_convert_to_mxn(payment: Dict, partial) -> None:
     amount = payment["amount"]
 
     if currency == _USD_CURRENCY:
-        partial["total"] = amount * _USD_TO_MXN
+        partial["total"] = amount * USD_TO_MXN
     else:
         partial["total"] = amount
 
