@@ -36,3 +36,44 @@
     ```
     docker compose run --rm payments python manage.py migrate
     ```
+- Run Tests:
+    ```
+    docker compose run --rm payments python manage.py test
+    ```
+
+### Requests
+- Register User:
+    ```
+    url = localhost:8080/api/register
+    payload = {
+        "name": "John",
+        "email": "john@gmail.com",
+        "password": "superpassword"
+    }
+    ```
+- Login:
+    ```
+    url = localhost:8080/api/login
+    payload = {
+        "email": "john@gmail.com",
+        "password": "superpassword"
+    }
+    ```
+- Payments:
+    ```
+    url = localhost:8080/api/payments
+    payload = [
+      {
+        "amount": 1160,
+        "currency": "MXN"
+      }
+    ]
+    ```
+- Change password:
+    ```
+    url = localhost:8080/api/password
+    payload = {
+      "old_password": "superpassword",
+      "new_password": "anothergoodpassword"
+    }
+    ```
