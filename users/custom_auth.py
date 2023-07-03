@@ -17,6 +17,8 @@ class CustomAuth(BaseAuthentication):
                 raise exceptions.AuthenticationFailed('token not valid')
             except jwt.ExpiredSignatureError:
                 raise exceptions.AuthenticationFailed('token is expired')
+            except jwt.DecodeError:
+                raise exceptions.AuthenticationFailed('token not valid')
             except IndexError:
                 raise exceptions.AuthenticationFailed('missing auth prefix')
 

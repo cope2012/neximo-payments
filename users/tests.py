@@ -1,7 +1,12 @@
+import jwt
 from django.test import TestCase
 from http import HTTPStatus
 from django.contrib.auth import get_user_model
-
+from users.custom_auth import CustomAuth
+from django.test.client import RequestFactory
+from rest_framework import exceptions
+from unittest import mock
+import datetime
 
 DEFAULT_PASSWORD = "superpassword"
 
@@ -147,3 +152,64 @@ class TestUsersViews(TestCase):
             }
         )
         self.assertEqual(change_password_resp.status_code, HTTPStatus.FORBIDDEN)
+
+
+class TestCustomAuth(TestCase):
+    def test_no_auth_headers(self):
+        custom_auth = CustomAuth()
+        request = RequestFactory().post('/api/payments')
+        resp = custom_auth.authenticate(request)
+        assert resp is None
+
+    def test_invalid_token(self):
+        custom_auth = CustomAuth()
+        request = RequestFactory().post('/api/payments')
+        request.headers = {
+            "Authorization": f"Bearer kj"
+        }
+        try:
+            custom_auth.authenticate(request)
+            assert False
+        except exceptions.AuthenticationFailed as e:
+            assert str(e) == 'token not valid'
+
+    @mock.patch('jwt.decode')
+    def test_token_expired(self, validate_mock):
+        create_user(self.client)
+        login_resp = login_user(self.client)
+        custom_auth = CustomAuth()
+        request = RequestFactory().post('/api/payments')
+        request.headers = {
+            "Authorization": f"Bearer {login_resp.json()['access']}"
+        }
+        validate_mock.side_effect = jwt.ExpiredSignatureError()
+        try:
+            custom_auth.authenticate(request)
+            assert False
+        except exceptions.AuthenticationFailed as e:
+            assert str(e) == 'token is expired'
+
+    def test_token_missing_auth_prefix(self):
+        create_user(self.client)
+        login_resp = login_user(self.client)
+        custom_auth = CustomAuth()
+        request = RequestFactory().post('/api/payments')
+        request.headers = {
+            "Authorization": login_resp.json()['access']
+        }
+        try:
+            custom_auth.authenticate(request)
+            assert False
+        except exceptions.AuthenticationFailed as e:
+            assert str(e) == 'missing auth prefix'
+
+    def test_authentication_succeeded(self):
+        create_user(self.client)
+        login_resp = login_user(self.client)
+        custom_auth = CustomAuth()
+        request = RequestFactory().post('/api/payments')
+        request.headers = {
+            "Authorization": f"Bearer {login_resp.json()['access']}"
+        }
+        user, _ = custom_auth.authenticate(request)
+        assert user == get_user_model().objects.first()
